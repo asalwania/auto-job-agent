@@ -7,10 +7,11 @@ import type {
 } from '.';
 
 // ============================================================
-// Row types — match the SQL schema column-for-column
+// Row types — use `type` (not `interface`) so they satisfy
+// Record<string, unknown> which Supabase generics require.
 // ============================================================
 
-export interface JobRow {
+export type JobRow = {
   id: string;
   title: string;
   company: string;
@@ -27,9 +28,9 @@ export interface JobRow {
   status: string;
   scraped_at: string;
   updated_at: string;
-}
+};
 
-export interface TailoredResumeRow {
+export type TailoredResumeRow = {
   id: string;
   job_id: string;
   base_resume_id: string;
@@ -40,9 +41,9 @@ export interface TailoredResumeRow {
   covered_keywords: string[];
   pdf_path: string | null;
   created_at: string;
-}
+};
 
-export interface ApplicationRow {
+export type ApplicationRow = {
   id: string;
   job_id: string;
   tailored_resume_id: string | null;
@@ -51,24 +52,24 @@ export interface ApplicationRow {
   response_status: string;
   notes: string | null;
   created_at: string;
-}
+};
 
-export interface BaseResumeRow {
+export type BaseResumeRow = {
   id: string;
   name: string;
   data: BaseResume;
   is_active: boolean;
   created_at: string;
-}
+};
 
-export interface ScrapeLogRow {
+export type ScrapeLogRow = {
   id: string;
   source: string | null;
   jobs_found: number;
   jobs_new: number;
   errors: unknown[];
   ran_at: string;
-}
+};
 
 // ============================================================
 // Insert types — auto-generated columns are optional
@@ -114,33 +115,68 @@ export type ScrapeLogUpdate = Partial<ScrapeLogInsert>;
 // Supabase Database type
 // ============================================================
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       jobs: {
         Row: JobRow;
         Insert: JobInsert;
         Update: JobUpdate;
+        Relationships: [];
       };
       tailored_resumes: {
         Row: TailoredResumeRow;
         Insert: TailoredResumeInsert;
         Update: TailoredResumeUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'tailored_resumes_job_id_fkey';
+            columns: ['job_id'];
+            isOneToOne: false;
+            referencedRelation: 'jobs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'tailored_resumes_base_resume_id_fkey';
+            columns: ['base_resume_id'];
+            isOneToOne: false;
+            referencedRelation: 'base_resumes';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       applications: {
         Row: ApplicationRow;
         Insert: ApplicationInsert;
         Update: ApplicationUpdate;
+        Relationships: [
+          {
+            foreignKeyName: 'applications_job_id_fkey';
+            columns: ['job_id'];
+            isOneToOne: false;
+            referencedRelation: 'jobs';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'applications_tailored_resume_id_fkey';
+            columns: ['tailored_resume_id'];
+            isOneToOne: false;
+            referencedRelation: 'tailored_resumes';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       base_resumes: {
         Row: BaseResumeRow;
         Insert: BaseResumeInsert;
         Update: BaseResumeUpdate;
+        Relationships: [];
       };
       scrape_logs: {
         Row: ScrapeLogRow;
         Insert: ScrapeLogInsert;
         Update: ScrapeLogUpdate;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
@@ -153,4 +189,4 @@ export interface Database {
     };
     CompositeTypes: Record<string, never>;
   };
-}
+};
