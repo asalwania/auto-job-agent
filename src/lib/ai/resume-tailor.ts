@@ -1,10 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import type { BaseResume, JDAnalysis, TailoredResume } from '@/types';
 
 // ── Client ────────────────────────────────────────────────────────
 
-const anthropic = new Anthropic();
-const MODEL = 'claude-sonnet-4-20250514';
+const openai = new OpenAI();
+const MODEL = 'gpt-4o';
 
 // ── Prompts ───────────────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ Return JSON:
 
 // ── Validation ────────────────────────────────────────────────────
 
-interface ClaudeResponse {
+interface LLMResponse {
   tailoredBullets: Record<string, string[]>;
   tailoredSummary: string;
   atsScore: number;
@@ -59,7 +59,7 @@ interface ClaudeResponse {
   missingKeywords: string[];
 }
 
-function validateResponse(raw: unknown): ClaudeResponse {
+function validateResponse(raw: unknown): LLMResponse {
   const obj = raw as Record<string, unknown>;
 
   const tailoredBullets: Record<string, string[]> = {};
@@ -117,29 +117,28 @@ export function getAtsScore(
 
   const calculatedScore = Math.round((covered / unique.length) * 100);
 
-  // Weighted: 60% Claude's assessment + 40% keyword coverage
+  // Weighted: 60% LLM assessment + 40% keyword coverage
   return Math.round(resume.atsScore * 0.6 + calculatedScore * 0.4);
 }
 
 // ── Core ──────────────────────────────────────────────────────────
 
-async function callClaude(
+async function callLLM(
   baseResume: BaseResume,
   jdAnalysis: JDAnalysis,
   jdText: string,
-): Promise<ClaudeResponse> {
-  const response = await anthropic.messages.create({
+): Promise<LLMResponse> {
+  const response = await openai.chat.completions.create({
     model: MODEL,
     max_tokens: 2048,
-    system: SYSTEM_PROMPT,
+    response_format: { type: 'json_object' },
     messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: buildUserPrompt(baseResume, jdAnalysis, jdText) },
     ],
   });
 
-  const text =
-    response.content[0].type === 'text' ? response.content[0].text : '';
-
+  const text = response.choices[0]?.message?.content ?? '';
   const parsed = JSON.parse(text);
   return validateResponse(parsed);
 }
@@ -152,16 +151,16 @@ export async function tailorResume(
   jdText: string,
 ): Promise<TailoredResume> {
   // First attempt
-  let claudeResult: ClaudeResponse | null = null;
+  let llmResult: LLMResponse | null = null;
 
   try {
-    claudeResult = await callClaude(baseResume, jdAnalysis, jdText);
+    llmResult = await callLLM(baseResume, jdAnalysis, jdText);
   } catch (err) {
     console.error('tailorResume attempt 1 failed:', err);
 
     // Retry once
     try {
-      claudeResult = await callClaude(baseResume, jdAnalysis, jdText);
+      llmResult = await callLLM(baseResume, jdAnalysis, jdText);
     } catch (retryErr) {
       console.error('tailorResume attempt 2 failed:', retryErr);
     }
@@ -171,11 +170,11 @@ export async function tailorResume(
   const result: TailoredResume = {
     baseResumeId: baseResume.id,
     jobId: '', // caller sets this
-    tailoredBullets: claudeResult?.tailoredBullets ?? {},
-    tailoredSummary: claudeResult?.tailoredSummary ?? baseResume.summary,
-    atsScore: claudeResult?.atsScore ?? 0,
-    coveredKeywords: claudeResult?.coveredKeywords ?? [],
-    missingKeywords: claudeResult?.missingKeywords ?? [],
+    tailoredBullets: llmResult?.tailoredBullets ?? {},
+    tailoredSummary: llmResult?.tailoredSummary ?? baseResume.summary,
+    atsScore: llmResult?.atsScore ?? 0,
+    coveredKeywords: llmResult?.coveredKeywords ?? [],
+    missingKeywords: llmResult?.missingKeywords ?? [],
   };
 
   // Recalculate ATS score with weighted blend

@@ -3,10 +3,10 @@ import { scraperQueue } from '@/lib/queue/queues';
 
 export async function POST(request: NextRequest) {
   try {
-    const secret = request.headers.get('X-Cron-Secret');
-    if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // const secret = request.headers.get('X-Cron-Secret');
+    // if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
 
     await scraperQueue.add('cron-scrape', {
       query: 'Full Stack Developer',

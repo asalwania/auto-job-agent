@@ -4,7 +4,7 @@
  * Prerequisites:
  *   - Supabase running with schema applied
  *   - Redis running on REDIS_URL
- *   - ANTHROPIC_API_KEY set
+ *   - OPENAI_API_KEY set
  *   - Base resume seeded (npm run seed)
  *
  * Usage:
@@ -88,10 +88,10 @@ async function testDatabase() {
   ok('Database OK', `Inserted, fetched, and deleted job ${inserted.id}`);
 }
 
-// ── Test 2: Claude API (JD Parser) ───────────────────────────────
+// ── Test 2: OpenAI API (JD Parser) ───────────────────────────────
 
-async function testClaudeApi() {
-  header('Claude API (JD Parser)');
+async function testOpenAiApi() {
+  header('OpenAI API (JD Parser)');
 
   const { parseJobDescription } = await import('../lib/ai/jd-parser');
   const analysis = await parseJobDescription(SAMPLE_JD);
@@ -105,14 +105,14 @@ async function testClaudeApi() {
   console.log('  Role Level:', analysis.roleLevel);
   console.log('  Experience Years:', analysis.experienceYears);
 
-  ok('Claude API OK', `${analysis.requiredSkills.length} skills, ${analysis.keywords.length} keywords`);
+  ok('OpenAI API OK', `${analysis.requiredSkills.length} skills, ${analysis.keywords.length} keywords`);
 
   return analysis;
 }
 
 // ── Test 3: Resume Tailor ─────────────────────────────────────────
 
-async function testResumeTailor(jdAnalysis: Awaited<ReturnType<typeof testClaudeApi>>) {
+async function testResumeTailor(jdAnalysis: Awaited<ReturnType<typeof testOpenAiApi>>) {
   header('Resume Tailor');
 
   const { createClient: createSB } = await import('@supabase/supabase-js');
@@ -270,17 +270,17 @@ async function main() {
   }
 
   // Test 2
-  let jdAnalysis: Awaited<ReturnType<typeof testClaudeApi>> | null = null;
+  let jdAnalysis: Awaited<ReturnType<typeof testOpenAiApi>> | null = null;
   try {
-    jdAnalysis = await testClaudeApi();
+    jdAnalysis = await testOpenAiApi();
   } catch (err) {
-    fail('Claude API', err);
+    fail('OpenAI API', err);
   }
 
   // Test 3
   let resumeData: Awaited<ReturnType<typeof testResumeTailor>> | null = null;
   try {
-    if (!jdAnalysis) throw new Error('Skipped — Claude API test failed');
+    if (!jdAnalysis) throw new Error('Skipped — OpenAI API test failed');
     resumeData = await testResumeTailor(jdAnalysis);
   } catch (err) {
     fail('Resume Tailor', err);

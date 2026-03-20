@@ -1,10 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import type { BaseResume, Job, JDAnalysis } from '@/types';
 
 // ── Client ────────────────────────────────────────────────────────
 
-const anthropic = new Anthropic();
-const MODEL = 'claude-sonnet-4-20250514';
+const openai = new OpenAI();
+const MODEL = 'gpt-4o';
 
 // ── Prompts ───────────────────────────────────────────────────────
 
@@ -45,19 +45,16 @@ export async function generateCoverLetter(
   jdAnalysis: JDAnalysis,
 ): Promise<string> {
   try {
-    const response = await anthropic.messages.create({
+    const response = await openai.chat.completions.create({
       model: MODEL,
       max_tokens: 800,
-      system: SYSTEM_PROMPT,
       messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: buildUserPrompt(baseResume, job, jdAnalysis) },
       ],
     });
 
-    const text =
-      response.content[0].type === 'text' ? response.content[0].text : '';
-
-    return text.trim();
+    return (response.choices[0]?.message?.content ?? '').trim();
   } catch (err) {
     console.error('generateCoverLetter failed:', err);
     return '';

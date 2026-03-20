@@ -1,12 +1,12 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { createHash } from 'crypto';
 import type { JDAnalysis, RoleLevel, RoleType } from '@/types';
 
 // ── Client ────────────────────────────────────────────────────────
 
-const anthropic = new Anthropic(); // reads ANTHROPIC_API_KEY from env
+const openai = new OpenAI(); // reads OPENAI_API_KEY from env
 
-const MODEL = 'claude-sonnet-4-20250514';
+const MODEL = 'gpt-4o';
 const MAX_JD_LENGTH = 6000;
 
 // ── Prompt ────────────────────────────────────────────────────────
@@ -96,17 +96,18 @@ function toStringArray(val: unknown): string[] {
 
 // ── Core ──────────────────────────────────────────────────────────
 
-async function callClaude(jdText: string): Promise<JDAnalysis> {
-  const response = await anthropic.messages.create({
+async function callLLM(jdText: string): Promise<JDAnalysis> {
+  const response = await openai.chat.completions.create({
     model: MODEL,
     max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: buildUserPrompt(jdText) }],
+    response_format: { type: 'json_object' },
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(jdText) },
+    ],
   });
 
-  const text =
-    response.content[0].type === 'text' ? response.content[0].text : '';
-
+  const text = response.choices[0]?.message?.content ?? '';
   const parsed = JSON.parse(text);
   return validateAnalysis(parsed);
 }
@@ -130,7 +131,7 @@ export async function parseJobDescription(
 
   // First attempt
   try {
-    const result = await callClaude(truncated);
+    const result = await callLLM(truncated);
     setCache(hash, result);
     return result;
   } catch (err) {
@@ -139,7 +140,7 @@ export async function parseJobDescription(
 
   // Retry once
   try {
-    const result = await callClaude(truncated);
+    const result = await callLLM(truncated);
     setCache(hash, result);
     return result;
   } catch (err) {

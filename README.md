@@ -27,7 +27,7 @@ Scrape → Parse → Tailor → Apply → Track
 | Node.js 20+ | Required for Next.js 16 |
 | Redis | BullMQ job queue backend |
 | Supabase account | Free tier works — used for PostgreSQL database |
-| Anthropic API key | Powers JD parsing, resume tailoring, and cover letters |
+| OpenAI API key | Powers JD parsing, resume tailoring, and cover letters |
 | Resend API key | Optional — for email notifications |
 
 Start Redis with Docker:
@@ -53,7 +53,7 @@ Copy `.env.local` and fill in your keys:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
-ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
 REDIS_URL=redis://localhost:6379
 RESEND_API_KEY=re_...            # optional
 MY_EMAIL=you@example.com
@@ -188,7 +188,7 @@ src/
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript (strict mode) |
 | Styling | Tailwind CSS 4 |
-| AI | Claude claude-sonnet-4-20250514 via @anthropic-ai/sdk |
+| AI | OpenAI GPT-4o via openai SDK |
 | Database | Supabase (PostgreSQL) |
 | Job Queue | BullMQ + Redis |
 | Scraping | Playwright (Chromium) |
@@ -204,7 +204,7 @@ src/
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side only) |
-| `ANTHROPIC_API_KEY` | Yes | Anthropic API key for Claude |
+| `OPENAI_API_KEY` | Yes | OpenAI API key for GPT-4o |
 | `REDIS_URL` | Yes | Redis connection string (default: `redis://localhost:6379`) |
 | `RESEND_API_KEY` | No | Resend API key for email notifications |
 | `MY_EMAIL` | No | Your email for notifications |
