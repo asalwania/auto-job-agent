@@ -3,16 +3,15 @@ import { upsertJob } from '@/lib/db/jobs';
 import { createServiceClient } from '@/lib/db/client';
 
 // ── Register scrapers here ────────────────────────────────────────
-// Import concrete scraper classes as you build them:
-//
-// import { LinkedInScraper } from './linkedin';
+
+import { LinkedInScraper } from './linkedin';
 // import { NaukriScraper } from './naukri';
-//
-// Then add to the array below.
 
 function getScrapers(): BaseScraper[] {
-  // TODO: add concrete scrapers as they are implemented
-  return [];
+  return [
+    new LinkedInScraper(),
+    // new NaukriScraper(),
+  ];
 }
 
 // ── Result type ───────────────────────────────────────────────────

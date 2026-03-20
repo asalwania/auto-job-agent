@@ -10,6 +10,7 @@ export interface ScrapedJob {
   url: string;
   jdText: string;
   source: string;
+  hasEasyApply?: boolean;
 }
 
 // ── User agents pool ──────────────────────────────────────────────
