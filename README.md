@@ -96,6 +96,33 @@ npm run worker:dev # BullMQ workers + health check on port 3001
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Docker (Recommended)
+
+Run the entire app with a single command:
+
+```bash
+# 1. Fill in your .env.local with real values (Supabase, Anthropic, etc.)
+
+# 2. Start everything (Redis + Next.js + Workers)
+npm run docker:up
+```
+
+This starts 3 containers:
+- **redis** — Redis 7 on port 6379
+- **app** — Next.js dashboard on port 3000
+- **worker** — BullMQ workers + health check on port 3001
+
+Other commands:
+
+```bash
+npm run docker:logs     # Follow logs from all containers
+npm run docker:down     # Stop and remove containers
+```
+
+The `app` and `worker` containers share a volume for resume PDFs and screenshots (`storage/`). Redis data persists across restarts.
+
+> **Note:** You still need an external Supabase instance (cloud or self-hosted). The Docker setup handles Redis, the Next.js app, and BullMQ workers.
+
 ## Usage
 
 1. **Settings** — Configure job titles to search for, preferred locations, ATS score threshold, and which sources to scrape
@@ -198,6 +225,9 @@ src/
 | `npm run test:integration` | Run integration tests |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
+| `npm run docker:up` | Build and start all containers |
+| `npm run docker:down` | Stop all containers |
+| `npm run docker:logs` | Follow container logs |
 
 ## Known Limitations
 

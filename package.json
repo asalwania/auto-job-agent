@@ -11,7 +11,10 @@
     "worker:dev": "tsx watch src/server/worker.ts",
     "dev:all": "concurrently --names next,worker --prefix-colors blue,green \"next dev\" \"npm run worker:dev\"",
     "seed": "tsx src/lib/resume/seed.ts",
-    "test:integration": "tsx src/tests/integration.ts"
+    "test:integration": "tsx src/tests/integration.ts",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
