@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "worker": "tsx src/server/worker.ts",
+    "worker:dev": "tsx watch src/server/worker.ts",
+    "dev:all": "concurrently --names next,worker --prefix-colors blue,green \"next dev\" \"npm run worker:dev\"",
+    "seed": "tsx src/lib/resume/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -35,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
