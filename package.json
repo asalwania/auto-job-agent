@@ -10,7 +10,8 @@
     "worker": "tsx src/server/worker.ts",
     "worker:dev": "tsx watch src/server/worker.ts",
     "dev:all": "concurrently --names next,worker --prefix-colors blue,green \"next dev\" \"npm run worker:dev\"",
-    "seed": "tsx src/lib/resume/seed.ts"
+    "seed": "tsx src/lib/resume/seed.ts",
+    "test:integration": "tsx src/tests/integration.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
