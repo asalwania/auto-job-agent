@@ -5,12 +5,18 @@ import { createServiceClient } from '@/lib/db/client';
 // ── Register scrapers here ────────────────────────────────────────
 
 import { LinkedInScraper } from './linkedin';
-// import { NaukriScraper } from './naukri';
+import { NaukriScraper } from './naukri';
+import { GreenhouseScraper } from './greenhouse';
+import { LeverScraper } from './lever';
+import { WellfoundScraper } from './wellfound';
 
 function getScrapers(): BaseScraper[] {
   return [
     new LinkedInScraper(),
-    // new NaukriScraper(),
+    new NaukriScraper(),
+    new GreenhouseScraper(),
+    new LeverScraper(),
+    new WellfoundScraper(),
   ];
 }
 
